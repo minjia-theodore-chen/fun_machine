@@ -1,0 +1,2 @@
+# Tell clangd to locate the compilation database inside the CMake build folder
+CompilationDatabase: "build"

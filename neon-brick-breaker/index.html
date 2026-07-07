@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Brick Breaker - Cyberpunk Arcade</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game-container">
+    <!-- Sound Toggle Button -->
+    <button id="soundToggle" class="sound-toggle" aria-label="Toggle Sound">🔊</button>
+
+    <!-- Head-Up Display (HUD) -->
+    <div class="hud">
+      <div class="hud-item">
+        <span class="hud-label">Score</span>
+        <span id="scoreVal" class="hud-value">000000</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">High Score</span>
+        <span id="highScoreVal" class="hud-value magenta">000000</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Level</span>
+        <span id="levelVal" class="hud-value">1</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Lives</span>
+        <span id="livesVal" class="hud-value green">❤❤❤</span>
+      </div>
+    </div>
+
+    <!-- Canvas Play Area -->
+    <div class="canvas-wrapper">
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+      <!-- Active Power-up Pill Indicators -->
+      <div id="activePowerups" class="active-powerups">
+        <!-- Dynamic power-up labels injected here -->
+      </div>
+
+      <!-- Start Screen Overlay -->
+      <div id="startScreen" class="screen-overlay">
+        <div class="screen-content">
+          <h1>Neon Breaker</h1>
+          <p class="subtitle">A retro cyberpunk brick-breaking arcade experience. Deflect the glowing sphere, collect modules, and shatter the matrix grid.</p>
+          
+          <button id="startBtn" class="btn">Initialize Grid</button>
+          
+          <div class="controls-info">
+            <span><span class="key-badge">←</span> <span class="key-badge">→</span> / Mouse: Move</span>
+            <span><span class="key-badge">Space</span>: Pause</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pause Screen Overlay -->
+      <div id="pauseScreen" class="screen-overlay hidden">
+        <div class="screen-content">
+          <h1>System Paused</h1>
+          <p class="subtitle">Grid sequence is currently suspended.</p>
+          <button id="resumeBtn" class="btn">Resume Matrix</button>
+          <button id="restartPauseBtn" class="btn btn-magenta">Restart Game</button>
+        </div>
+      </div>
+
+      <!-- Level Clear Screen Overlay -->
+      <div id="levelClearScreen" class="screen-overlay hidden">
+        <div class="screen-content">
+          <h1>Sector Cleared</h1>
+          <p class="subtitle">Matrix grid fully disassembled. Preparing next sector sequence...</p>
+          <button id="nextLevelBtn" class="btn">Load Next Level</button>
+        </div>
+      </div>
+
+      <!-- Game Over Screen Overlay -->
+      <div id="gameOverScreen" class="screen-overlay hidden">
+        <div class="screen-content">
+          <h1 class="magenta">Connection Lost</h1>
+          <p class="subtitle">System critical damage. High scores have been cached.</p>
+          
+          <div class="high-scores-list">
+            <div class="high-scores-title">Top Operations</div>
+            <div id="highScoresContainer">
+              <!-- Dynamically populated scores -->
+            </div>
+          </div>
+          
+          <button id="restartBtn" class="btn btn-magenta">Re-Initialize</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

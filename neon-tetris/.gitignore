@@ -1,0 +1,9 @@
+# Ignore local compilation databases
+compile_commands.json
+
+# Build outputs
+build/
+neon-tetris
+
+# OS files
+.DS_Store
