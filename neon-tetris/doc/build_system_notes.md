@@ -42,18 +42,25 @@ neon-tetris/
 
 ---
 
-## 3. Out-of-Source Build (源外构建)
+## 3. The CMake Build Trilogy (源外构建三部曲)
 
-A key concept in modern software engineering is separating the **Source Tree** (your pristine code) from the **Binary Tree** (temporary build artifacts).
+A key concept in modern software engineering is separating the **Source Tree** (your pristine code) from the **Binary Tree** (temporary build artifacts). This is implemented through the standard CMake build trilogy:
 
-### The Directory Walkthrough:
-When you are inside the `build/` directory and run:
-```bash
-cmake ..
-```
-* **Command Location**: You remain inside `build/`.
-* **Path Parameter (`..`)**: CMake looks at the parent directory (`..`) to find `CMakeLists.txt`. It evaluates all paths written inside `CMakeLists.txt` (like `src/Main.cpp`) relative to that parent directory.
-* **Output Placement**: Because your shell is currently located inside `build/`, CMake writes all generated build cache files, compiler Makefiles, and compiled `.o` binaries **directly into your current `build/` directory**.
+### Step 1: `mkdir build && cd build` (Preparing the Sandbox)
+* **What it does**: Creates a new folder named `build/` (if it doesn't exist) and changes your terminal's current working directory into it.
+* **Why**: By navigating *into* a separate folder first, you ensure that all subsequent generated files (compiler outputs, makefiles, caches) are written here, keeping your main source folders pristine.
+* **MCU/Embedded Parallel**: Similar to configuring a dedicated scratchpad RAM block for transient runtime calculations without affecting program memory.
+
+### Step 2: `cmake ..` (System Configuration & Blueprint Generation)
+* **What it does**: Runs the CMake configuration engine targeting the parent directory (`..`), which contains the root `CMakeLists.txt`.
+* **The Directory Mechanics**:
+  - **Command Location**: You remain inside `build/`.
+  - **Path Parameter (`..`)**: CMake looks at the parent directory (`..`) to read `CMakeLists.txt`.
+  - **Output Placement**: Because you are running the command from inside the `build/` folder, CMake writes all generated build files (such as platform-specific Makefiles and `compile_commands.json` databases) directly into this `build/` directory.
+
+### Step 3: `cmake --build .` or `make` (Executing the Compilation)
+* **What it does**: Compiles the source code files and links the final binary inside the current directory (`.`).
+* **Why use `cmake --build .` over `make`?**: While `make` is GNU-specific, `cmake --build .` is platform-independent. It automatically triggers whatever compiler toolchain was generated (whether it is GNU Make, MSBuild on Windows, or Xcode build on macOS).
 
 ### The Clean Advantage:
 To clean the project fully, you do not need `make clean` scripts. You simply delete the `build/` folder:
