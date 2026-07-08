@@ -6,7 +6,7 @@
 #include <thread>
 
 Game::Game()
-    : score(0), level(1), linesCleared(0), isPaused(true), isGameOver(false),
+    : score(0), level(1), linesCleared(0), isPaused(false), isGameOver(false),
       shouldQuit(false), gravityAccumulator(0.0) {
   // Seed initial piece generator bag
   refillPieceBag();

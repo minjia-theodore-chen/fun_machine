@@ -4,3 +4,7 @@
 
 # Ignore VS Code configuration directory
 .vscode/
+
+# Ignore compiler cache folders
+.cache/
+**/.cache/

@@ -4,6 +4,7 @@ compile_commands.json
 # Build outputs
 build/
 neon-tetris
+.cache/
 
 # OS files
 .DS_Store
