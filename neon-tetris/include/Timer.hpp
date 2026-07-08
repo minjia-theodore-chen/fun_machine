@@ -4,18 +4,18 @@
 
 class Timer {
 public:
-    Timer();
+  Timer();
 
-    // Resets the timer's starting point to now
-    void reset();
+  // Resets the timer's starting point to now
+  void reset();
 
-    // Returns seconds elapsed since the last time getElapsedSeconds() was called
-    double getElapsedSeconds();
+  // Returns seconds elapsed since the last time getElapsedSeconds() was called
+  double getElapsedSeconds();
 
-    // Returns the total time in seconds since the timer was created/reset
-    double getTotalTimeSeconds() const;
+  // Returns the total time in seconds since the timer was created/reset
+  double getTotalTimeSeconds() const;
 
 private:
-    std::chrono::time_point<std::chrono::high_resolution_clock> lastTime;
-    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+  std::chrono::time_point<std::chrono::high_resolution_clock> lastTime;
+  std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
 };
