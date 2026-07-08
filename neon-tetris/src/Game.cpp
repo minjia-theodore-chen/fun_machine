@@ -1,9 +1,132 @@
 #include "Game.hpp"
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <fstream>
 #include <iostream>
 #include <random>
 #include <thread>
+
+namespace {
+struct Note {
+  double frequency;
+  double duration;
+};
+
+const Note THEME_A[] = {
+    // Phrase 1
+    {659.25, 1.0},
+    {493.88, 0.5},
+    {523.25, 0.5},
+    {587.33, 1.0},
+    {523.25, 0.5},
+    {493.88, 0.5},
+    {440.00, 1.0},
+    {440.00, 0.5},
+    {523.25, 0.5},
+    {659.25, 1.0},
+    {587.33, 0.5},
+    {523.25, 0.5},
+    {493.88, 1.5},
+    {523.25, 0.5},
+    {587.33, 1.0},
+    {659.25, 1.0},
+    {523.25, 1.0},
+    {440.00, 1.0},
+    {440.00, 2.0},
+
+    // Phrase 2
+    {587.33, 1.5},
+    {698.46, 0.5},
+    {880.00, 1.0},
+    {783.99, 0.5},
+    {698.46, 0.5},
+    {659.25, 1.5},
+    {523.25, 0.5},
+    {659.25, 1.0},
+    {587.33, 0.5},
+    {523.25, 0.5},
+    {493.88, 1.0},
+    {493.88, 0.5},
+    {523.25, 0.5},
+    {587.33, 1.0},
+    {659.25, 1.0},
+    {523.25, 1.0},
+    {440.00, 1.0},
+    {440.00, 2.0}};
+
+template <typename T> void writeVal(std::ofstream &stream, const T &value) {
+  stream.write(reinterpret_cast<const char *>(&value), sizeof(T));
+}
+
+void generateWavFile(const std::string &filepath) {
+  if (std::ifstream(filepath).good()) {
+    return;
+  }
+
+  const uint32_t sampleRate = 22050;
+  const double beatDuration = 60.0 / 150.0;
+  std::vector<int16_t> allSamples;
+
+  for (const auto &note : THEME_A) {
+    double duration = note.duration * beatDuration;
+    uint32_t numSamples = static_cast<uint32_t>(duration * sampleRate);
+
+    if (note.frequency == 0.0) {
+      allSamples.insert(allSamples.end(), numSamples, 0);
+    } else {
+      double period = sampleRate / note.frequency;
+      for (uint32_t i = 0; i < numSamples; ++i) {
+        double progress = static_cast<double>(i) / numSamples;
+        double envelope = std::exp(-3.0 * progress);
+
+        double phase = std::fmod(static_cast<double>(i) / period, 1.0);
+        double val = (phase < 0.5) ? 1.0 : -1.0;
+
+        int16_t sample = static_cast<int16_t>(val * 0.15 * envelope * 32767.0);
+        allSamples.push_back(sample);
+      }
+    }
+
+    uint32_t gapSamples = static_cast<uint32_t>(0.05 * sampleRate);
+    allSamples.insert(allSamples.end(), gapSamples, 0);
+  }
+
+  uint32_t subchunk2Size = allSamples.size() * sizeof(int16_t);
+
+  std::ofstream file(filepath, std::ios::binary);
+  if (file.is_open()) {
+    file.write("RIFF", 4);
+    writeVal(file, 36 + subchunk2Size);
+    file.write("WAVE", 4);
+    file.write("fmt ", 4);
+    writeVal(file, 16u);
+    writeVal(file, uint16_t(1));
+    writeVal(file, uint16_t(1));
+    writeVal(file, uint32_t(sampleRate));
+    writeVal(file, uint32_t(sampleRate * 2));
+    writeVal(file, uint16_t(2));
+    writeVal(file, uint16_t(16));
+    file.write("data", 4);
+    writeVal(file, subchunk2Size);
+    file.write(reinterpret_cast<const char *>(allSamples.data()),
+               subchunk2Size);
+    file.close();
+  }
+}
+
+void startMusic() {
+  generateWavFile("/tmp/neon_tetris_theme.wav");
+  std::system("while true; do afplay /tmp/neon_tetris_theme.wav; done &");
+}
+
+void stopMusic() { std::system("pkill -f \"afplay.*neon_tetris_theme.wav\""); }
+
+void cleanMusic() {
+  std::system("pkill -f \"afplay.*neon_tetris_theme.wav\" && rm -f "
+              "/tmp/neon_tetris_theme.wav");
+}
+} // namespace
 
 Game::Game()
     : score(0), level(1), linesCleared(0), isPaused(false), isGameOver(false),
@@ -14,6 +137,11 @@ Game::Game()
   // Initialize the preview piece and the active piece
   nextPiece = Tetromino(getRandomShape());
   spawnNextPiece();
+}
+
+Game::~Game() {
+  // Terminate background music on exit
+  cleanMusic();
 }
 
 double Game::getTickInterval() const {
@@ -56,6 +184,7 @@ void Game::spawnNextPiece() {
   // Over)
   if (board.checkCollision(activePiece)) {
     isGameOver = true;
+    stopMusic();
   }
 }
 
@@ -79,6 +208,11 @@ void Game::processInput() {
   // Toggle pause state
   if (key == 'p' || key == 'P' || key == '\033') { // p, P, or Esc to pause
     isPaused = !isPaused;
+    if (isPaused) {
+      stopMusic();
+    } else {
+      startMusic();
+    }
     return;
   }
 
@@ -219,6 +353,9 @@ void Game::render() {
 }
 
 void Game::run() {
+  // Start background music
+  startMusic();
+
   // Initial draw to screen
   render();
 
@@ -255,4 +392,6 @@ void Game::resetGame() {
   refillPieceBag();
   nextPiece = Tetromino(getRandomShape());
   spawnNextPiece();
+  // Restart background music
+  startMusic();
 }

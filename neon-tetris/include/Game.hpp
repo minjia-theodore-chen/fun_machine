@@ -11,6 +11,7 @@
 class Game {
 public:
   Game();
+  ~Game();
 
   // Runs the main game loop
   void run();

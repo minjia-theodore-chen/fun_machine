@@ -26,18 +26,27 @@ struct Point {
   }
 };
 
-// Neon color definitions matching the brick breaker game
+// Nord color definitions (soft, elegant pastel theme to reduce eye fatigue)
 namespace NeonColors {
 const std::string RESET = "\033[0m";
-const std::string CYAN = "\033[38;2;0;243;255m";         // I piece
-const std::string YELLOW = "\033[38;2;255;240;0m";       // O piece
-const std::string PURPLE = "\033[38;2;188;19;254m";      // T piece
-const std::string GREEN = "\033[38;2;57;255;20m";        // S piece
-const std::string MAGENTA = "\033[38;2;255;0;127m";      // Z piece
-const std::string BLUE = "\033[38;2;0;30;255m";          // J piece
-const std::string ORANGE = "\033[38;2;255;110;0m";       // L piece
-const std::string DARK_GRAY = "\033[38;2;60;60;60m";     // Grid lines/Borders
-const std::string TEXT_WHITE = "\033[38;2;240;240;240m"; // GUI Text
+const std::string CYAN =
+    "\033[38;2;136;192;208m"; // I piece: Nord Frost Cyan (#88C0D0)
+const std::string YELLOW =
+    "\033[38;2;235;203;139m"; // O piece: Nord Sand Yellow (#EBCB8B)
+const std::string PURPLE =
+    "\033[38;2;180;142;173m"; // T piece: Nord Aurora Lavender (#B48EAD)
+const std::string GREEN =
+    "\033[38;2;163;190;140m"; // S piece: Nord Aurora Sage Green (#A3BE8C)
+const std::string MAGENTA =
+    "\033[38;2;191;97;106m"; // Z piece: Nord Aurora Rose Red (#BF616A)
+const std::string BLUE =
+    "\033[38;2;94;129;172m"; // J piece: Nord Frost Steel Blue (#5E81AC)
+const std::string ORANGE =
+    "\033[38;2;208;135;112m"; // L piece: Nord Aurora Orange (#D08770)
+const std::string DARK_GRAY =
+    "\033[38;2;76;86;106m"; // Grid/Borders: Nord Slate Gray (#4C566A)
+const std::string TEXT_WHITE =
+    "\033[38;2;216;222;233m"; // GUI Text: Nord Snow White (#D8DEE9)
 
 // Returns corresponding ANSI color string for a shape
 inline std::string getShapeColor(TetrominoShape shape) {
