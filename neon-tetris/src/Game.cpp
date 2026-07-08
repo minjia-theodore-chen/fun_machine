@@ -9,7 +9,7 @@ Game::Game() :
     score(0), 
     level(1), 
     linesCleared(0), 
-    isPaused(false), 
+    isPaused(true), 
     isGameOver(false), 
     shouldQuit(false), 
     gravityAccumulator(0.0) 
