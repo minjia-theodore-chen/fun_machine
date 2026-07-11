@@ -6,8 +6,12 @@
 #include <iostream>
 #include <random>
 #include <thread>
+#include <unistd.h>
+#include <signal.h>
 
 namespace {
+pid_t musicPid = 0;
+
 struct Note {
   double frequency;
   double duration;
@@ -15,47 +19,20 @@ struct Note {
 
 const Note THEME_A[] = {
     // Phrase 1
-    {659.25, 1.0},
-    {493.88, 0.5},
-    {523.25, 0.5},
-    {587.33, 1.0},
-    {523.25, 0.5},
-    {493.88, 0.5},
-    {440.00, 1.0},
-    {440.00, 0.5},
-    {523.25, 0.5},
-    {659.25, 1.0},
-    {587.33, 0.5},
-    {523.25, 0.5},
-    {493.88, 1.5},
-    {523.25, 0.5},
-    {587.33, 1.0},
-    {659.25, 1.0},
-    {523.25, 1.0},
-    {440.00, 1.0},
-    {440.00, 2.0},
+    {659.25, 1.0}, {493.88, 0.5}, {523.25, 0.5}, {587.33, 1.0}, {523.25, 0.5}, {493.88, 0.5},
+    {440.00, 1.0}, {440.00, 0.5}, {523.25, 0.5}, {659.25, 1.0}, {587.33, 0.5}, {523.25, 0.5},
+    {493.88, 1.5}, {523.25, 0.5}, {587.33, 1.0}, {659.25, 1.0},
+    {523.25, 1.0}, {440.00, 1.0}, {440.00, 2.0},
 
     // Phrase 2
-    {587.33, 1.5},
-    {698.46, 0.5},
-    {880.00, 1.0},
-    {783.99, 0.5},
-    {698.46, 0.5},
-    {659.25, 1.5},
-    {523.25, 0.5},
-    {659.25, 1.0},
-    {587.33, 0.5},
-    {523.25, 0.5},
-    {493.88, 1.0},
-    {493.88, 0.5},
-    {523.25, 0.5},
-    {587.33, 1.0},
-    {659.25, 1.0},
-    {523.25, 1.0},
-    {440.00, 1.0},
-    {440.00, 2.0}};
+    {587.33, 1.5}, {698.46, 0.5}, {880.00, 1.0}, {783.99, 0.5}, {698.46, 0.5},
+    {659.25, 1.5}, {523.25, 0.5}, {659.25, 1.0}, {587.33, 0.5}, {523.25, 0.5},
+    {493.88, 1.0}, {493.88, 0.5}, {523.25, 0.5}, {587.33, 1.0}, {659.25, 1.0},
+    {523.25, 1.0}, {440.00, 1.0}, {440.00, 2.0}
+};
 
-template <typename T> void writeVal(std::ofstream &stream, const T &value) {
+template <typename T>
+void writeVal(std::ofstream &stream, const T &value) {
   stream.write(reinterpret_cast<const char *>(&value), sizeof(T));
 }
 
@@ -109,22 +86,42 @@ void generateWavFile(const std::string &filepath) {
     writeVal(file, uint16_t(16));
     file.write("data", 4);
     writeVal(file, subchunk2Size);
-    file.write(reinterpret_cast<const char *>(allSamples.data()),
-               subchunk2Size);
+    file.write(reinterpret_cast<const char *>(allSamples.data()), subchunk2Size);
     file.close();
   }
 }
 
 void startMusic() {
   generateWavFile("/tmp/neon_tetris_theme.wav");
-  std::system("while true; do afplay /tmp/neon_tetris_theme.wav; done &");
+
+  if (musicPid > 0) {
+    return; // Already running
+  }
+
+  musicPid = fork();
+  if (musicPid == 0) {
+    // Child process: set a new process group ID to itself
+    setpgid(0, 0);
+
+    // Replace process image with shell loop
+    execl("/bin/sh", "sh", "-c", "while true; do afplay /tmp/neon_tetris_theme.wav; done", nullptr);
+
+    // Exit child if execl fails
+    _exit(1);
+  }
 }
 
-void stopMusic() { std::system("pkill -f \"afplay.*neon_tetris_theme.wav\""); }
+void stopMusic() {
+  if (musicPid > 0) {
+    // Send SIGTERM to the entire process group (negative PID)
+    kill(-musicPid, SIGTERM);
+    musicPid = 0;
+  }
+}
 
 void cleanMusic() {
-  std::system("pkill -f \"afplay.*neon_tetris_theme.wav\" && rm -f "
-              "/tmp/neon_tetris_theme.wav");
+  stopMusic();
+  std::remove("/tmp/neon_tetris_theme.wav");
 }
 } // namespace
 
